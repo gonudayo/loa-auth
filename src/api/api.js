@@ -48,8 +48,27 @@ const getCharacterProfile = async (EncryptMemberNo) => {
   }
 };
 
+const getCharacterList = async (characterName) => {
+  try {
+    return await axios.get(
+      encodeURI(
+        "https://developer-lostark.game.onstove.com/characters/" +
+          characterName +
+          "/siblings"
+      ),
+      {
+        headers: { authorization: process.env.TOKEN },
+      }
+    );
+  } catch (error) {
+    console.error("Failed to fetch Character List:", error);
+    throw new Error("Invalid characterName");
+  }
+};
+
 module.exports = {
   getMemberNo,
   getEncryptMemberNo,
   getCharacterProfile,
+  getCharacterList,
 };
