@@ -28,10 +28,10 @@ router.get("/genSecureCode", async (req, res) => {
 router.post("/verifyProfile", async (req, res) => {
   try {
     const { profileUrl } = req.body;
-    const name = await service.authProfile(profileUrl);
+    const result = await service.authProfile(profileUrl);
 
-    if (name !== undefined) {
-      return res.status(200).json({ success: true, name: name });
+    if (result !== undefined) {
+      return res.status(200).json({ success: true, result: result });
     } else {
       return res
         .status(400)

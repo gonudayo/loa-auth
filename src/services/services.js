@@ -55,7 +55,25 @@ const crawlerService = async (profileData) => {
       throw new Error("CharacterName not found in ogUrl");
     }
 
-    return characterName;
+    return checkCharacter(characterName);
+  } catch (error) {
+    console.error("Failed to fetch profile data:", error);
+    throw new Error("Invalid Profile");
+  }
+};
+
+const checkCharacter = async (characterName) => {
+  try {
+    const characterList = await api.getCharacterList(characterName);
+
+    for (character of characterList.data) {
+      if (
+        character.ServerName === "루페온" &&
+        parseFloat(character.ItemMaxLevel.replace(/[^0-9.]/g, "")) >= 1640
+      ) {
+        return { level: character.ItemMaxLevel, name: character.CharacterName };
+      }
+    }
   } catch (error) {
     console.error("Failed to fetch profile data:", error);
     throw new Error("Invalid Profile");
