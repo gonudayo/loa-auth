@@ -1,6 +1,7 @@
 const api = require("../api/api.js");
 const util = require("../utils/utils.js");
 const testSecureCode = require("../testSecureCode/secureCodeStore.js");
+const { User } = require("../models/User");
 
 const authProfile = async (profileUrl) => {
   try {
@@ -14,11 +15,24 @@ const authProfile = async (profileUrl) => {
     // 테스트용
     // return authCharacter(memberNo);
 
-    // 검증 필요 임시 처리
-    if (testSecureCode.getSecureCode() === profileIntroduce) {
-      console.log("프로필 소개글 검증 완료");
+    // 코드찾기에서 이름으로 찾기로 변경필요
+    const user = await User.findOne({ secureCode: profileIntroduce });
+
+    if (user) {
+      await User.updateOne(
+        { secureCode: profileIntroduce },
+        { secureCode: "" }
+      );
       return authCharacter(memberNo);
+    } else {
+      // 실패시
     }
+
+    // 검증 필요 임시 처리
+    // if (testSecureCode.getSecureCode() === profileIntroduce) {
+    //   console.log("프로필 소개글 검증 완료");
+    //   return authCharacter(memberNo);
+    // }
   } catch (error) {
     console.error("Failed to auth profile data:", error);
     throw new Error("Invalid EncryptMemberNo");
