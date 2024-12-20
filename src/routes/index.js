@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
-const api = require("../api/api.js");
-const util = require("../utils/utils.js");
 const service = require("../services/services.js");
-const testSecureCode = require("../testSecureCode/secureCodeStore.js");
 const { User } = require("../models/User");
 
 // 보안 코드 생성
@@ -15,20 +12,27 @@ router.get("/genSecureCode", async (req, res) => {
       .toString("hex")
       .slice(0, 32);
 
-    testSecureCode.setSecureCode(SecureCode); // 임시 저장 테스트용
-
     // 이미 인증이 완료된 캐릭터인지 확인
     const existingUser = await User.findOne({ name: req.body.name });
 
+    // 이전에 인증 시도 정보가 있는 경우
     if (existingUser) {
       if (existingUser.status === true) {
         return res.status(200).json({
           success: false,
           message: "This character has already been authenticated",
         });
+      } else if (existingUser.status === false) {
+        await User.updateOne(
+          { name: req.body.name },
+          { secureCode: SecureCode }
+        );
+
+        return res.status(200).json({ success: true, SecureCode });
       }
     }
 
+    // 최초 시도의 경우
     const userData = {
       name: req.body.name,
       server: req.body.server,
