@@ -7,6 +7,12 @@ const { User } = require("../models/User");
 // 보안 코드 생성
 router.get("/genSecureCode", async (req, res) => {
   try {
+    const findCharacter = await service.findCharacter(req.body);
+
+    if (findCharacter !== true) {
+      return res.status(200).json({ success: false, message: findCharacter });
+    }
+
     const SecureCode = await crypto
       .randomBytes(Math.ceil(16))
       .toString("hex")

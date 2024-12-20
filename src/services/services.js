@@ -2,6 +2,36 @@ const api = require("../api/api.js");
 const util = require("../utils/utils.js");
 const { User } = require("../models/User");
 
+const findCharacter = async (body) => {
+  try {
+    const characterList = await api.getCharacterList(body.name);
+
+    for (character of characterList.data) {
+      if (character.CharacterName === body.name) {
+        // 레벨 미달
+        if (
+          parseFloat(character.ItemMaxLevel.replace(/[^0-9.]/g, "")) <
+          process.env.MIN_LEVEL
+        ) {
+          return "레벨이 최소조건 보다 낮습니다.";
+        }
+        // 서버 불일치
+        if (character.ServerName !== body.server) {
+          return "서버가 일치하지 않습니다.";
+        }
+        // 조건 만족
+        return true;
+      }
+    }
+
+    // 캐릭터 찾지 못한 경우
+    return "존재하지 않는 캐릭터 입니다.";
+  } catch (error) {
+    console.error("Failed to find character data:", error);
+    throw new Error("Invalid Character");
+  }
+};
+
 const authProfile = async (profileUrl) => {
   try {
     // MemberNo 추출
@@ -90,4 +120,5 @@ const checkCharacter = async (characterName) => {
 
 module.exports = {
   authProfile,
+  findCharacter,
 };
